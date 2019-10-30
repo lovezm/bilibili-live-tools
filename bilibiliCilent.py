@@ -17,7 +17,13 @@ async def handle_1_TV_raffle(type, num, real_roomid, raffleid):
     json_response2 = await response2.json(content_type=None)
     Printer().printer(f"参与房间 {real_roomid} 广播道具抽奖 {raffleid} 状态: {json_response2['msg']}", "Lottery", "cyan")
     if json_response2['code'] == 0:
-        Statistics().append_to_TVlist(raffleid, real_roomid)
+        data = json_response2['data']
+        if 'guard' == type:
+            award = data.get('award_text', '')
+        else:
+            award = data.get('award_name', '')
+            award += f'+{data.get("award_num", "")}'
+        Printer().printer(f'ID {raffleid:<9} {award}', 'Lottery', 'green')
     else:
         print(json_response2)
 
@@ -31,21 +37,20 @@ async def handle_1_room_TV(real_roomid):
         await bilibili().post_watching_history(real_roomid)
         response = await bilibili().get_giftlist_of_TV(real_roomid)
         json_response = await response.json(content_type=None)
-        checklen = json_response['data']['list']
-        num = len(checklen)
-        list_available_raffleid = []
-        for j in range(0, num):
-            raffleid = json_response['data']['list'][j]['raffleId']
-            type = json_response['data']['list'][j]['type']
-            if Statistics().check_TVlist(raffleid):
-                list_available_raffleid.append([type, raffleid])
-        tasklist = []
-        num_available = len(list_available_raffleid)
-        for k in list_available_raffleid:
-            task = asyncio.ensure_future(handle_1_TV_raffle(k[0], num_available, real_roomid, k[1]))
-            tasklist.append(task)
-        if tasklist:
-            await asyncio.wait(tasklist, return_when=asyncio.ALL_COMPLETED)
+
+        gifts = json_response['data']['gift']
+
+        for gift in gifts:
+            if gift['raffleId'] not in Rafflehandler().list_TV_processed:
+                gift_data = {
+                    'id': gift['raffleId'], 
+                    'type': gift['type'], 
+                    'time_wait': gift['time_wait'], 
+                    'roomid': real_roomid, 
+                }
+                Rafflehandler().list_TV_processed.append(gift['raffleId'])
+                await Rafflehandler().list_TV_waiting.put(gift_data)
+
 
 
 class bilibiliClient():
@@ -205,6 +210,9 @@ class bilibiliClient():
 
         except:
             return
+
+        if dic.get('scene_key') is not None:
+            dic = dic.get('msg')
         cmd = dic['cmd']
 
         if cmd == 'LIVE':
