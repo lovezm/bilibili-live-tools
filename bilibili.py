@@ -13,7 +13,6 @@ from printer import Printer
 import aiohttp
 import asyncio
 
-
 reload(sys)
 
 
@@ -410,7 +409,7 @@ class bilibili():
     async def guard_list(self):
         url = "http://jianting.233.re/jz.php"
         headers = {
-            "User-Agent": "bilibili-live-tools/" + str(self.dic_bilibili['uid'])
+            "User-Agent": "bilibili-live-tools/"
         }
         response = requests.get(url, headers=headers)
         return response
@@ -418,7 +417,7 @@ class bilibili():
     async def pk_list(self):
         url = "http://jianting.233.re/pk.php"
         headers = {
-            "User-Agent": "bilibili-live-tools/" + str(self.dic_bilibili['uid'])
+            "User-Agent": "bilibili-live-tools/"
         }
         response = requests.get(url, headers=headers)
         return response
