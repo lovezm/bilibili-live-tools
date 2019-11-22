@@ -407,7 +407,7 @@ class bilibili():
         return response
 
     async def guard_list(self):
-        url = "http://118.25.108.153:8080/guard"
+        url = "http://jianting.233.re/jz.php"
         headers = {
             "User-Agent": "bilibili-live-tools/" + str(self.dic_bilibili['uid'])
         }
@@ -415,7 +415,7 @@ class bilibili():
         return response
 
     async def pk_list(self):
-        url = "http://118.25.108.153:8080/pk"
+        url = "http://jianting.233.re/pk.php"
         headers = {
             "User-Agent": "bilibili-live-tools/" + str(self.dic_bilibili['uid'])
         }
